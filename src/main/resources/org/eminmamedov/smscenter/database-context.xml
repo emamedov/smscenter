@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd"
+    default-autowire="byName">
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${smscenter.db.driver}" />
+        <property name="url" value="${smscenter.db.url}" />
+        <property name="username" value="${smscenter.db.user}" />
+        <property name="password" value="${smscenter.db.password}" />
+    </bean>
+
+    <bean id="sessionFactory" class="org.eminmamedov.smscenter.dao.MybatisSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="typeAliasesPackage" value="org.eminmamedov.smscenter.datamodel" />
+        <property name="mapperLocations" value="classpath*:org/eminmamedov/smscenter/datamodel/*Mapper.xml" />
+        <property name="customTypeHandlers">
+            <list>
+                <bean class="org.eminmamedov.smscenter.common.EnumAnnotatedTypeHandler">
+                    <constructor-arg name="type" value="org.eminmamedov.smscenter.datamodel.MessageStatus" />
+                </bean>
+            </list>
+        </property>
+        <property name="configurationProperties">
+            <props>
+                <prop key="mapUnderscoreToCamelCase">true</prop>
+                <prop key="aggressiveLazyLoading">false</prop>
+                <prop key="cacheEnabled">true</prop>
+                <prop key="useColumnLabel">true</prop>
+                <prop key="useGeneratedKeys">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- DAO beans -->
+    <bean id="userMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="org.eminmamedov.smscenter.dao.UserMapper" />
+        <property name="sqlSessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="channelMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="org.eminmamedov.smscenter.dao.ChannelMapper" />
+        <property name="sqlSessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="senderMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="org.eminmamedov.smscenter.dao.SenderMapper" />
+        <property name="sqlSessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="smsMapper" class="org.mybatis.spring.mapper.MapperFactoryBean">
+        <property name="mapperInterface" value="org.eminmamedov.smscenter.dao.SmsMapper" />
+        <property name="sqlSessionFactory" ref="sessionFactory" />
+    </bean>
+
+</beans>

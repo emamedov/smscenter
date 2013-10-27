@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.eminmamedov.smscenter.dao.UserMapper">
+
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <resultMap id="userResult" type="User">
+        <id property="id" column="user_id"/>
+        <result property="name" column="name"/>
+        <result property="lastLogin" column="last_login"/>
+        <result property="enabled" column="enabled"/>
+        <result property="allowedIp" column="allowed_ip"/>
+        <collection property="senders" column="user_id" ofType="Sender" select="getSendersByUser"/>
+    </resultMap>
+
+    <sql id="userColumns">name, last_login, enabled, allowed_ip</sql>
+
+    <select id="getUser" resultMap="userResult" >
+        select 
+            user_id, <include refid="userColumns"/>
+        from 
+            user
+        where 
+            upper(name)=upper(#{0}) and password=#{1}
+    </select>
+
+    <select id="getSendersByUser" parameterType="int" resultType="Sender">
+        select 
+            s.sender_id as id,
+            s.sign as sign
+        from 
+            user2sender u2s
+            inner join sender s on u2s.sender_id=s.sender_id
+        where 
+            u2s.user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        insert into user
+        (<include refid="userColumns"/>, password, description, created_on)
+        values
+        (#{name}
+        ,null
+        ,#{enabled}
+        ,#{allowedIp}
+        ,#{encryptedPassword}
+        ,''
+        ,sysdate())
+    </insert>
+
+    <update id="update" parameterType="User">
+        update user
+        set
+            error_count=0,
+            last_login=#{lastLogin}
+        where
+            user_id = #{id}
+    </update>
+
+    <update id="wrongPassword">
+        update user
+        set
+            error_count=error_count+1,
+            enabled=(error_count <![CDATA[<=]]> 10)
+        where
+            upper(name)=upper(#{name})
+            and allowed_ip is null
+    </update>
+
+    <delete id="delete" parameterType="User">
+        delete from user where user_id=#{id}
+    </delete>
+
+</mapper>

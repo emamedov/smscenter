@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<request>
+    <login>test</login>
+    <password>test</password>
+    <sendMessages>
+        <message>
+            <clientId>1</clientId>
+            <receiver>79853869839</receiver>
+            <text>Test message</text>
+        </message>
+    </sendMessages>
+    <checkMessages>
+        <message>
+            <serverId>1</serverId>
+        </message>
+    </checkMessages>
+</request>

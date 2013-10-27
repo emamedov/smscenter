@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response>
+    <sendMessages>
+        <message>
+            <clientId>1</clientId>
+            <serverId>1</serverId>
+            <text>Test message</text>
+            <groupIndex>0</groupIndex>
+            <groupCount>0</groupCount>
+        </message>
+    </sendMessages>
+    <checkMessages>
+        <message>
+            <clientId>3</clientId>
+            <serverId>1</serverId>
+            <status>1</status>
+        </message>
+    </checkMessages>
+</response>

@@ -1,0 +1,35 @@
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <!-- APPENDERS LIST -->
+    <appender name="consoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%t] %-5p %C{2} - %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="fileAppender" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${app.home}/log/smscenter.log" />
+        <param name="datePattern" value="'.'yyyy-MM-dd" />
+        <param name="append" value="true" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%t] %-5p %C{2} - %m%n" />
+        </layout>
+    </appender>
+
+    <!-- LOGGER LIST -->
+    <logger name="org.eminmamedov">
+        <level value="DEBUG" />
+    </logger>
+
+    <logger name="java.sql">
+        <level value="DEBUG" />
+    </logger>
+
+    <root>
+        <priority value="INFO"></priority>
+        <appender-ref ref="consoleAppender" />
+        <appender-ref ref="fileAppender" />
+    </root>
+</log4j:configuration>

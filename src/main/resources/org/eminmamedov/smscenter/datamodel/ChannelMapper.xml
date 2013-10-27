@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.eminmamedov.smscenter.dao.ChannelMapper">
+
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <sql id="channelColumns">
+        name, login, password, host, port, enabled,
+        send_speed, check_speed, bind_type, bind_ton, bind_npi,
+        source_addr_ton, source_addr_npi, dest_addr_ton, dest_addr_npi
+    </sql>
+    
+    <select id="findAll" resultType="Channel">
+        select channel_id as id, <include refid="channelColumns"/> from channel
+    </select>
+
+    <insert id="insert" parameterType="Channel" useGeneratedKeys="true" keyProperty="id">
+        insert into channel
+        (<include refid="channelColumns"/>)
+        values
+        (#{name}
+        ,#{login}
+        ,#{password}
+        ,#{host}
+        ,#{port}
+        ,#{enabled}
+        ,#{sendSpeed}
+        ,#{checkSpeed}
+        ,#{bindType}
+        ,#{bindTON}
+        ,#{bindNPI}
+        ,#{sourceAddrTON}
+        ,#{sourceAddrNPI}
+        ,#{destAddrTON}
+        ,#{destAddrNPI})
+    </insert>
+
+    <delete id="delete" parameterType="Channel">
+        delete from channel where channel_id=#{id}
+    </delete>
+
+    <delete id="removeLinks" parameterType="Channel">
+        delete from channel2sender where channel_id=#{id}
+    </delete>
+
+    <insert id="createLink">
+        insert into channel2sender(channel_id, sender_id) values (#{param1.id}, #{param2.id})
+    </insert>
+
+</mapper>

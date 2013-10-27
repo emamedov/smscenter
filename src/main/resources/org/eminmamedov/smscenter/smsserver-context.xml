@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd 
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.2.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd"
+    default-autowire="byName">
+
+    <context:property-placeholder location="classpath:smscenter.properties" />
+    <!--file:${app.home}/smscenter.properties-->
+
+    <import resource="database-context.xml" />
+
+    <task:executor id="smsCenterTasksExecutor" pool-size="10-50" queue-capacity="100" />
+
+    <context:component-scan base-package="org.eminmamedov.smscenter.common" />
+    <context:component-scan base-package="org.eminmamedov.smscenter.services" />
+    <context:component-scan base-package="org.eminmamedov.smscenter.receivers" />
+    <context:component-scan base-package="org.eminmamedov.smscenter.senders" />
+
+    <bean id="httpReceiver" class="org.eminmamedov.smscenter.receivers.http.HttpReceiver"/>
+    <bean id="smppReceiver" class="org.eminmamedov.smscenter.receivers.smpp.SmppReceiver"/>
+
+    <util:list id="smsReceivers">
+        <ref bean="httpReceiver"/>
+        <ref bean="smppReceiver"/>
+    </util:list>
+
+    <util:map id="requestProcessors">
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).BIND}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.BindProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).UNBIND_RESP}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.UnbindRespProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).UNBIND}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.UnbindProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).ENQUIRE_LINK}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.EnquireLinkProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).ENQUIRE_LINK_RESP}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.EnquireLinkRespProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).SUBMIT_SM}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.SubmitSmProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).DELIVER_SM_RESP}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.DeliverSmRespProcessor" />
+      </entry>
+      <entry key="#{T(org.eminmamedov.smscenter.receivers.smpp.SmppCommandType).QUERY_SM}">
+          <bean class="org.eminmamedov.smscenter.receivers.smpp.processors.QuerySmProcessor" />
+      </entry>
+    </util:map>
+
+    <bean id="smppSmsSender" class="org.eminmamedov.smscenter.senders.smpp.SmppSmsSenderFactory"/>
+
+    <util:list id="smsSendersFactories">
+        <ref bean="smppSmsSender"/>
+    </util:list>
+
+    <aop:aspectj-autoproxy/>
+
+    <aop:config proxy-target-class="true"/>
+
+    <bean id="smscenterExceptionHandler" class="org.eminmamedov.smscenter.services.ExceptionHandler" />
+
+</beans>

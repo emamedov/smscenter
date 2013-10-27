@@ -1,0 +1,19 @@
+<body>
+    <h1>SMSCenter</h1>
+    <p>
+        <div>Note: Here and everywhere in documentations SMS is a text message.</div>
+        <div>SMSCenter is a set of applications to organize SMS distribution based on customer's clients database. The application set consists of:</div>
+        <div>* SMSCenter Server - the server part for receiving SMS messages from clients and sending them to other SMSC providers (including final cell operators)</div>
+        <div>* SMSCenter Server WebUI - Web application for administration and monitoring of the server</div>
+    </p>
+    <h1>SMSCenter Server</h1>
+    <p>
+        <div>SMSCenter Server provides next features:</div>
+        <div>* Receiving SMS messages from registered users via SMPP and HTTP protocols. Other protocols can also be implemented. You have to implement org.eminmamedov.smscenter.receivers.SmsReceiver interface only.</div>
+        <div>* Sending the received SMS messages to other SMSC via SMPP protocol. Other protocols can be implemented also. You have to implement org.eminmamedov.smscenter.senders.SmsSender interface only.</div>
+        <div>* Updating the status of SMS messages</div>
+        <div>* Splitting large SMS messages</div>
+        <div>* Support multiple SMSC (Channels). For each SMS corresponding SMSC will be choosen depending on the specified sender.</div>
+        <div>Information about Users, Channels (SMSC providers), Registered Senders and received SMS messages is stored in database.</div>
+    </p>
+</body>

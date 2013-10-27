@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.eminmamedov.smscenter.dao.SenderMapper">
+
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <resultMap id="senderResult" type="Sender">
+        <id property="id" column="sender_id"/>
+        <result property="sign" column="sign"/>
+    </resultMap>
+
+    <sql id="senderColumns">sender_id, sign</sql>
+
+    <select id="getSender" resultMap="senderResult">
+        select 
+            <include refid="senderColumns"/>
+        from 
+            sender
+        where 
+            sign = #{sign}
+    </select>
+
+    <insert id="insert" parameterType="Sender" useGeneratedKeys="true" keyProperty="id">
+        insert into sender
+        (sign)
+        values
+        (#{sign})
+    </insert>
+
+    <delete id="delete" parameterType="Sender">
+        delete from sender where sender_id=#{id}
+    </delete>
+
+    <delete id="removeLinks" parameterType="Sender">
+        delete from user2sender where sender_id=#{id}
+    </delete>
+
+    <insert id="createLink">
+        insert into user2sender(user_id, sender_id) values (#{param1.id}, #{param2.id})
+    </insert>
+
+</mapper>

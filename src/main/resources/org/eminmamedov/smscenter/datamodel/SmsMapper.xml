@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.eminmamedov.smscenter.dao.SmsMapper">
+
+    <resultMap id="smsResult" type="SMSMessage">
+        <id property="id" column="server_id"/>
+        <result property="phone" column="phone"/>
+        <result property="senderSign" column="sender_sign"/>
+        <result property="text" column="sms_text"/>
+        <result property="smsGroupId" column="sms_group_id"/>
+        <result property="smsGroupIndex" column="sms_group_index"/>
+        <result property="smsGroupCount" column="sms_group_count"/>
+        <result property="status" column="status" typeHandler="org.eminmamedov.smscenter.common.EnumAnnotatedTypeHandler" javaType="org.eminmamedov.smscenter.datamodel.MessageStatus"/>
+        <result property="clientId" column="smsclient_id"/>
+        <result property="smscId" column="smsc_id"/>
+        <result property="sendDate" column="date_server"/>
+        <result property="version" column="version"/>
+        <association property="user" javaType="User" resultMap="org.eminmamedov.smscenter.dao.UserMapper.userResult"/>
+        <association property="sender" javaType="Sender" resultMap="org.eminmamedov.smscenter.dao.SenderMapper.senderResult"/>
+        <association property="channel" javaType="Channel" resultMap="channelResult"/>
+    </resultMap>
+
+    <resultMap id="channelResult" type="Channel">
+        <id property="id" column="channel_id"/>
+    </resultMap>
+
+    <sql id="smsInsertColumns">
+        server_id,
+        phone,
+        sender_sign,
+        sms_text,
+        sms_group_id,
+        sms_group_index,
+        sms_group_count,
+        status,
+        smsclient_id,
+        smsc_id,
+        date_server,
+        date_client,
+        version,
+        channel_id
+    </sql>
+
+    <sql id="smsSelectColumns">
+        sms.server_id,
+        sms.phone,
+        sms.sender_sign,
+        sms.sms_text,
+        sms.sms_group_id,
+        sms.sms_group_index,
+        sms.sms_group_count,
+        sms.status,
+        sms.smsclient_id,
+        sms.smsc_id,
+        sms.date_server,
+        sms.date_client,
+        sms.version,
+        sms.channel_id
+    </sql>
+
+    <sql id="userColumns">u.user_id, u.name, u.last_login, u.enabled, u.allowed_ip</sql>
+
+    <sql id="senderColumns">s.sender_id, s.sign</sql>
+
+    <select id="getMessage" resultMap="smsResult">
+        select 
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from 
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+        where 
+            sms.server_id = #{id}
+    </select>
+
+    <select id="getMessageBySmscId" resultMap="smsResult">
+        select 
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from 
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+        where
+            sms.channel_id = #{param1.id} 
+        and sms.smsc_id = #{param2}
+    </select>
+
+    <select id="getMessages" resultMap="smsResult">
+        select 
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from 
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+        where 
+            sms.server_id in 
+            <foreach item="item" index="index" collection="list" open="(" separator="," close=")">
+            #{item}
+            </foreach>
+    </select>
+
+    <select id="getMessagesByClientIds" resultMap="smsResult">
+        select 
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from 
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+        where 
+            sms.user_id = #{param1.id}
+        and sms.smsclient_id in 
+            <foreach item="item" index="index" collection="param2" open="(" separator="," close=")">
+            #{item}
+            </foreach>
+    </select>
+
+    <select id="getMessagesByState" resultMap="smsResult">
+        select
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+            left join channel2sender c2s on s.sender_id=c2s.sender_id
+        where 
+            sms.status = #{param2}
+        and (((sms.channel_id is not null) and (sms.channel_id=#{param1.id}))
+            or ((sms.channel_id is null) and (c2s.channel_id=#{param1.id})))
+        and last_updated_date &lt;= #{param4}
+        limit 0, #{param3}
+    </select>
+
+    <select id="getUpdatedMessages" resultMap="smsResult">
+        select 
+            <include refid="smsSelectColumns"/>,
+            <include refid="userColumns"/>,
+            <include refid="senderColumns"/>
+        from 
+            sms sms
+            left join user u on u.user_id=sms.user_id
+            left join sender s on s.sender_id=sms.sender_id
+        where 
+            sms.status in (-1, 2)
+            and u.user_id = #{param1.id}
+            and sms.informed = 0
+        limit 0, #{param2}
+    </select>
+
+    <select id="getLastSmsId" resultType="int">
+        select max(server_id) from sms
+    </select>
+
+    <insert id="addMessages">
+        insert into sms
+        (<include refid="smsInsertColumns"/>, user_id, sender_id, last_updated_date)
+        values
+        <foreach collection="list" item="message" separator=",">
+            (#{message.id}
+             ,#{message.phone}
+             ,#{message.senderSign}
+             ,#{message.text}
+             ,#{message.smsGroupId}
+             ,#{message.smsGroupIndex}
+             ,#{message.smsGroupCount}
+             ,#{message.status}
+             ,#{message.clientId}
+             ,0
+             ,#{message.sendDate}
+             ,#{message.sendDate}
+             ,0
+             ,null
+             ,#{message.user.id}
+             ,#{message.sender.id}
+             ,sysdate())
+        </foreach>
+    </insert>
+
+    <update id="update" parameterType="SMSMessage">
+        update
+            sms
+        set
+            status = #{status},
+            smsc_id = #{smscId},
+            version = version + 1,
+            channel_id = #{channel.id},
+            last_updated_date = sysdate()
+        where
+            server_id = #{id}
+        and version = #{version}
+    </update>
+
+    <delete id="delete" parameterType="SMSMessage">
+        delete from sms where server_id = #{id}
+    </delete>
+
+    <update id="setInformed">
+        update sms set informed = #{param2}, last_updated_date = sysdate() where server_id = #{param1}
+    </update>
+
+</mapper>

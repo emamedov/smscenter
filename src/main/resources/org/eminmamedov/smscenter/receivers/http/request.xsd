@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <xsd:element name="request" type="request" />
+    <xsd:complexType name="request">
+        <xsd:sequence>
+            <xsd:element name="login" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="password" type="xsd:string" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="sendMessages" type="sendMessages" minOccurs="0" maxOccurs="1" />
+            <xsd:element name="checkMessages" type="checkMessages" minOccurs="0" maxOccurs="1" />
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="sendMessages">
+        <xsd:sequence>
+            <xsd:element name="message" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="clientId" type="xsd:integer" minOccurs="1" />
+                        <xsd:element name="receiver" type="xsd:string" minOccurs="1" />
+                        <xsd:element name="text" type="xsd:string" minOccurs="1" />
+                        <xsd:element name="sender" type="xsd:string" minOccurs="0" maxOccurs="1" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+    <xsd:complexType name="checkMessages">
+        <xsd:sequence>
+            <xsd:element name="message" minOccurs="0" maxOccurs="unbounded">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="serverId" type="xsd:integer" minOccurs="1" />
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:sequence>
+    </xsd:complexType>
+</xsd:schema>
