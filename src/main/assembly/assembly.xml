@@ -13,6 +13,10 @@
             <outputDirectory>db</outputDirectory>
         </fileSet>
         <fileSet>
+            <directory>${project.build.directory}/generated-resources/appassembler/jsw/smscenter</directory>
+            <outputDirectory>/</outputDirectory>
+        </fileSet>
+        <fileSet>
             <directory>${project.basedir}</directory>
             <includes>
                 <include>README*</include>
@@ -24,15 +28,7 @@
     <files>
         <file>
             <source>${project.build.directory}/classes/smscenter.properties</source>
-            <outputDirectory>config</outputDirectory>
+            <outputDirectory>conf</outputDirectory>
         </file>
     </files>
-    <dependencySets>
-        <dependencySet>
-            <outputDirectory>lib</outputDirectory>
-            <excludes>
-                <exclude>net.sf.ehcache:ehcache</exclude>
-            </excludes>
-        </dependencySet>
-    </dependencySets>
 </assembly>
